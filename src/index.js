@@ -17,37 +17,54 @@ import "./index.css";
 
 // 함수 컴포넌트로의 전환 👉 state없이 render함수만 가짐, 코드가 간단해짐.
 function Square(props) {
-  return (
-    <button className="square" onClick={props.onClick}>
-      {props.value}
-    </button>
-  );
+  if ("onClick" in props) {
+    return (
+      <button className="square" onClick={props.onClick}>
+        {props.value}
+      </button>
+    );
+  } else {
+    return <button className="label">{props.value}</button>;
+  }
 }
 
 class Board extends React.Component {
   renderSquare(i) {
-    return (
-      <Square
-        value={this.props.squares[i]}
-        onClick={() => this.props.onClick(i)}
-      />
-    );
+    if (typeof i === "number") {
+      return (
+        <Square
+          value={this.props.squares[i]}
+          onClick={() => this.props.onClick(i)}
+        />
+      );
+    } else {
+      return <Square value={i} />;
+    }
   }
 
   render() {
     return (
       <div>
         <div className="board-row">
+          {this.renderSquare("Y\\X")}
+          {this.renderSquare("0")}
+          {this.renderSquare("1")}
+          {this.renderSquare("2")}
+        </div>
+        <div className="board-row">
+          {this.renderSquare("0")}
           {this.renderSquare(0)}
           {this.renderSquare(1)}
           {this.renderSquare(2)}
         </div>
         <div className="board-row">
+          {this.renderSquare("1")}
           {this.renderSquare(3)}
           {this.renderSquare(4)}
           {this.renderSquare(5)}
         </div>
         <div className="board-row">
+          {this.renderSquare("2")}
           {this.renderSquare(6)}
           {this.renderSquare(7)}
           {this.renderSquare(8)}
@@ -106,16 +123,18 @@ class Game extends React.Component {
 
   render() {
     const history = this.state.history;
-    const current = history[this.state.stepNumber];
+    const stepNumber = this.state.stepNumber;
+    const current = history[stepNumber];
     const winner = calculateWinner(current.squares);
 
     const moves = history.map((step, move) => {
       const { x, y } = step.coordinate;
-      const desc = move ? `Go to move #${move}` : "Go to game start";
       const xy = move ? `(${x}, ${y}) clicked!` : "";
       return (
         <li key={move}>
-          <button onClick={() => this.jumpTo(move)}>{desc}</button> {xy}
+          <button onClick={() => this.jumpTo(move)}>Go to move #{move}</button>
+          {xy}
+          {move === stepNumber ? "✅" : ""}
         </li>
       );
     });
