@@ -17,58 +17,58 @@ import "./index.css";
 
 // 함수 컴포넌트로의 전환 👉 state없이 render함수만 가짐, 코드가 간단해짐.
 function Square(props) {
-  if ("onClick" in props) {
-    return (
-      <button className="square" onClick={props.onClick}>
-        {props.value}
-      </button>
-    );
-  } else {
-    return <button className="label">{props.value}</button>;
-  }
+  return (
+    <button className="square" onClick={props.onClick ?? ""}>
+      {props.value}
+    </button>
+  );
+}
+
+function Label(props) {
+  return <button className="label">{props.value}</button>;
 }
 
 class Board extends React.Component {
   renderSquare(i) {
-    if (typeof i === "number") {
-      return (
-        <Square
-          value={this.props.squares[i]}
-          onClick={() => this.props.onClick(i)}
-        />
-      );
-    } else {
-      return <Square value={i} />;
-    }
+    return (
+      <Square
+        value={this.props.squares[i]}
+        onClick={() => this.props.onClick(i)}
+      />
+    );
+  }
+
+  renderLabel(l) {
+    return <Label value={l} />;
+  }
+
+  renderBorderLow(i) {
+    const squareNum = i * 3;
+    return (
+      <div className="board-row" key={i}>
+        {this.renderLabel(i)}
+        {this.renderSquare(squareNum)}
+        {this.renderSquare(squareNum + 1)}
+        {this.renderSquare(squareNum + 2)}
+      </div>
+    );
   }
 
   render() {
+    const borderRows = [];
+    for (let i = 0; i < 3; i++) {
+      borderRows.push(this.renderBorderLow(i));
+    }
+
     return (
       <div>
         <div className="board-row">
-          {this.renderSquare("Y\\X")}
-          {this.renderSquare("0")}
-          {this.renderSquare("1")}
-          {this.renderSquare("2")}
+          {this.renderLabel("Y\\X")}
+          {this.renderLabel(0)}
+          {this.renderLabel(1)}
+          {this.renderLabel(2)}
         </div>
-        <div className="board-row">
-          {this.renderSquare("0")}
-          {this.renderSquare(0)}
-          {this.renderSquare(1)}
-          {this.renderSquare(2)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare("1")}
-          {this.renderSquare(3)}
-          {this.renderSquare(4)}
-          {this.renderSquare(5)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare("2")}
-          {this.renderSquare(6)}
-          {this.renderSquare(7)}
-          {this.renderSquare(8)}
-        </div>
+        {borderRows}
       </div>
     );
   }
