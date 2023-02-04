@@ -82,16 +82,21 @@ class Game extends React.Component {
         {
           squares: Array(9).fill(null),
           coordinate: { x: null, y: null },
+          stepNumber: 0,
         },
       ],
       stepNumber: 0,
       xIsNext: true,
+      order: true, // true: asc, false: desc
     };
   }
 
   handleClick(i) {
-    const history = this.state.history.slice(0, this.state.stepNumber + 1);
-    const current = history[history.length - 1];
+    const history = this.state.history.slice();
+    const stepNumber = this.state.stepNumber;
+    const current =
+      history[this.state.order ? stepNumber : history.length - 1 - stepNumber];
+
     const squares = current.squares.slice();
 
     if (calculateWinner(squares) || squares[i]) {
@@ -102,13 +107,16 @@ class Game extends React.Component {
     const x = i % 3;
     const y = parseInt(i / 3);
 
+    const new_item = {
+      squares,
+      coordinate: { x, y },
+      stepNumber: history.length,
+    };
+
     this.setState({
-      history: history.concat([
-        {
-          squares,
-          coordinate: { x, y },
-        },
-      ]),
+      history: this.state.order
+        ? [...history, new_item]
+        : [new_item, ...history],
       stepNumber: history.length,
       xIsNext: !this.state.xIsNext,
     });
@@ -121,20 +129,32 @@ class Game extends React.Component {
     });
   }
 
+  handleToggle() {
+    const history = this.state.history.slice();
+    this.setState({
+      history: history.reverse(),
+      order: !this.state.order,
+    });
+  }
+
   render() {
     const history = this.state.history;
     const stepNumber = this.state.stepNumber;
-    const current = history[stepNumber];
+    const current =
+      history[this.state.order ? stepNumber : history.length - 1 - stepNumber];
     const winner = calculateWinner(current.squares);
 
     const moves = history.map((step, move) => {
       const { x, y } = step.coordinate;
-      const xy = move ? `(${x}, ${y}) clicked!` : "";
+      const stepNumber_ = step.stepNumber;
+      const xy = stepNumber_ ? `(${x}, ${y}) clicked!` : "";
       return (
-        <li key={move}>
-          <button onClick={() => this.jumpTo(move)}>Go to move #{move}</button>
+        <li key={stepNumber_}>
+          <button onClick={() => this.jumpTo(stepNumber_)}>
+            Go to move #{stepNumber_}
+          </button>
           {xy}
-          {move === stepNumber ? "✅" : ""}
+          {stepNumber_ === stepNumber ? "✅" : ""}
         </li>
       );
     });
@@ -155,6 +175,8 @@ class Game extends React.Component {
         </div>
         <div className="game-info">
           <div>{status}</div>
+          <button onClick={() => this.handleToggle()}>순서 바꾸기</button>
+          <div>Order: {this.state.order ? "ASC" : "DESC"}</div>
           <ol>{moves}</ol>
         </div>
       </div>
