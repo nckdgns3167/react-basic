@@ -33,6 +33,10 @@ ul {
   width: 34px;
 }
 
+.square.isLast {
+  color: crimson;
+}
+
 .label {
   border: none;
   background: #fff;
